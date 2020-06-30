@@ -4,15 +4,19 @@ from os import getenv
 from ast import literal_eval
 import threading
 import random
-
+import os
 from gmusicapi import CallFailure, Mobileclient
 
+CREDENTIAL_FILE = 'mobileclient.cred'
 
 class GMusicWrapper(object):
     def __init__(self, username, password, logger=None):
+        print(username)
         self._api = Mobileclient()
         self.logger = logger
-        success = self._api.login(username, password, getenv('ANDROID_ID', Mobileclient.FROM_MAC_ADDRESS))
+        if not os.path.exists(CREDENTIAL_FILE):
+            self._api.perform_oauth(CREDENTIAL_FILE)
+        success = self._api.oauth_login(Mobileclient.FROM_MAC_ADDRESS, CREDENTIAL_FILE)
 
         if not success:
             raise Exception("Unsuccessful login. Aborting!")
